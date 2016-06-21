@@ -17,26 +17,9 @@ var plumber      = require('gulp-plumber');
 var rev          = require('gulp-rev');
 var development    = true;
 var devUrl        = 'http://example.com';
-var path         = {
-    distPath:'./assets/dist/',
-    buildPath:'./assets/build/',
-    dist:{
-        fonts: this.distPath+'fonts/',
-        images: this.distPath+'images/',
-        styles: this.distPath+'styles/',
-        scripts: this.distPath+'scripts/',
-    },
-    build :{
-        fonts: this.buildPath+'fonts/',
-        images: this.buildPath+'images/',
-        styles: this.buildPath+'styles/',
-        scripts: this.buildPath+'scripts/',
-    }
-
-};
 //fonts, images, styles, scripts
 gulp.task('styles', function () {
-  return gulp.src([path.build.styles+'main.scss', path.build.styles+'plugins/*.css'])
+  return gulp.src(['./build/styles/main.scss', './build/styles/plugins/*.css'])
       .pipe(gulpif(development,sourcemaps.init()))
       .pipe(sass({
               outputStyle: 'nested', // libsass doesn't support expanded yet
@@ -57,13 +40,13 @@ gulp.task('styles', function () {
           safe:true
       }))
       .pipe(gulpif(development,sourcemaps.write('.')))
-      .pipe(gulp.dest(path.dist.styles))
+      .pipe(gulp.dest('./assets/styles/'))
       .pipe(browserSync.stream());
 });
 
 gulp.task('scripts', function (){
     return gulp.src([
-            path.build.scripts+'plugins/*js', path.build.scripts+'scripts.js'
+        './build/scripts/primary/*js','./build/scripts/plugins/*js', './build/scripts/scripts.js'
     ])
         .pipe(jshint())
         .pipe(jshint.reporter('jshint-stylish'))
@@ -77,24 +60,24 @@ gulp.task('scripts', function (){
             }
         }))
         .pipe(gulpif(development,sourcemaps.write('.')))
-        .pipe(gulp.dest(path.dist.scripts))
+        .pipe(gulp.dest('./assets/scripts/'))
         .pipe(browserSync.stream());
 });
 gulp.task('fonts', function() {
-    return gulp.src([path.build.fonts+'*.*',path.build.fonts+'*/*.*'])
+    return gulp.src(['./builds/fonts/*.*'])
         .pipe(flatten())
-        .pipe(gulp.dest(path.dist.fonts))
+        .pipe(gulp.dest('./assets/fonts/'))
         .pipe(browserSync.stream());
 });
 
 gulp.task('images', function() {
-    return gulp.src([path.build.images+'*.*',path.build.images+'*/*.*'])
+    return gulp.src(['./builds/images/*.*'])
         .pipe(imagemin({
             progressive: true,
             interlaced: true,
             svgoPlugins: [{removeUnknownsAndDefaults: false}, {cleanupIDs: false}]
         }))
-        .pipe(gulp.dest(path.dist.images))
+        .pipe(gulp.dest('./assets/images/'))
         .pipe(browserSync.stream());
 });
 
@@ -103,10 +86,10 @@ gulp.task('watch', function() {
         files: ['**/*.php', '*.php','*.html'],
         proxy: devUrl,
     });
-    gulp.watch([path.build.styles + '**/*'], ['styles']);
-    gulp.watch([path.build.scripts + '**/*'], ['scripts']);
-    gulp.watch([path.build.fonts + '**/*'], ['fonts']);
-    gulp.watch([path.build.images + '**/*'], ['images']);
+    gulp.watch([ './builds/styles/**/*'], ['styles']);
+    gulp.watch(['./builds/scripts/**/*'], ['scripts']);
+    gulp.watch(['./builds/fonts/**/*'], ['fonts']);
+    gulp.watch(['./builds/images/**/*'], ['images']);
 });
 
 //Build process
@@ -118,7 +101,7 @@ gulp.task('build', function(callback) {
 });
 
 // Deletes the build folder completely
-gulp.task('clean', require('del').bind(null, [path.distPath]));
+gulp.task('clean', require('del').bind(null, ['./assets/']));
 
 gulp.task('default', ['clean'], function() {
   gulp.start('build');
